@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Kvalitet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Installera beroenden
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Formatkontroll
+        run: npm run format:check
+      - name: Test
+        run: npm test
+
+  build:
+    name: Bygg
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Installera beroenden
+        run: npm ci
+      - name: Bygg klienten
+        run: npm run build
+      - name: Ladda upp byggartefakt
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist
+          if-no-files-found: error
